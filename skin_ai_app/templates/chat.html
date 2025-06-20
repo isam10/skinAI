@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Consultation - Dr. Tarannum</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4cc9f0;
+            --background: #0b0c10;
+            --card-bg: rgba(28, 30, 39, 0.8);
+            --chat-user: rgba(67, 97, 238, 0.15);
+            --chat-doctor: rgba(67, 97, 238, 0.8);
+            --text-primary: #f8f9fa;
+            --text-secondary: #ced4da;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(67, 97, 238, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(76, 201, 240, 0.1) 0%, transparent 50%);
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(135deg, rgba(67, 97, 238, 0.03) 0%, transparent 50%),
+                linear-gradient(225deg, rgba(76, 201, 240, 0.03) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        .page-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 0 20px rgba(67, 97, 238, 0.1);
+            padding: 50px 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(67, 97, 238, 0.1), transparent 70%);
+            z-index: -1;
+            animation: pulse 15s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+            100% { opacity: 0.3; }
+        }
+        
+        .accent-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+        
+        .doctor-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .doctor-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            box-shadow: 0 8px 15px rgba(67, 97, 238, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .doctor-avatar svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+        
+        .doctor-details h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 5px;
+        }
+        
+        .doctor-details p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .chat-box {
+            height: 450px;
+            background: rgba(25, 26, 36, 0.8);
+            border-radius: 16px;
+            padding: 20px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
+        }
+        
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .chat-box::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 20px;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            max-width: 80%;
+            position: relative;
+        }
+        
+        .message-user {
+            background: var(--chat-user);
+            border-radius: 18px 18px 0 18px;
+            padding: 15px 20px;
+            margin-left: auto;
+            color: var(--text-primary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.2);
+        }
+        
+        .message-doctor {
+            background: var(--chat-doctor);
+            border-radius: 18px 18px 18px 0;
+            padding: 15px 20px;
+            margin-right: auto;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .message p {
+            margin: 0;
+            line-height: 1.5;
+            font-size: 1rem;
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .message-doctor .message-time {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+            margin-left: 10px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin-right: 4px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+        
+        .input-area {
+            display: flex;
+            position: relative;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            background: rgba(25, 26, 36, 0.8);
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 5px 20px rgba(67, 97, 238, 0.2);
+        }
+        
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            padding: 0;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+        }
+        
+        button svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+        
+        .features {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .feature-button {
+            background: rgba(67, 97, 238, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.2);
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: var(--accent);
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-button:hover {
+            background: rgba(67, 97, 238, 0.2);
+            border-color: rgba(76, 201, 240, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .feature-button svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            fill: var(--accent);
+        }
+        
+        /* Home button styles */
+        .home-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(76, 201, 240, 0.3);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .home-button:hover {
+            background: rgba(67, 97, 238, 0.2);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .home-button svg {
+            margin-right: 8px;
+            fill: var(--accent);
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Floating elements for visual interest */
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(20px);
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .float-1 {
+            width: 200px;
+            height: 200px;
+            background: var(--primary);
+            top: -100px;
+            right: -100px;
+            animation: float 18s infinite alternate ease-in-out;
+        }
+        
+        .float-2 {
+            width: 150px;
+            height: 150px;
+            background: var(--accent);
+            bottom: -75px;
+            left: -75px;
+            animation: float 15s infinite alternate-reverse ease-in-out;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(30px, 30px) rotate(180deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+        
+        .medical-icons {
+            position: absolute;
+            opacity: 0.03;
+            z-index: -1;
+        }
+        
+        .icon-1 {
+            top: 100px;
+            right: 50px;
+            font-size: 60px;
+            transform: rotate(15deg);
+        }
+        
+        .icon-2 {
+            bottom: 120px;
+            left: 40px;
+            font-size: 50px;
+            transform: rotate(-10deg);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+                border-radius: 20px;
+            }
+            
+            .doctor-details h1 {
+                font-size: 1.8rem;
+            }
+            
+            .chat-box {
+                height: 350px;
+            }
+            
+            .features {
+                flex-wrap: wrap;
+            }
+            
+            .feature-button {
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* If we have an image from diagnosis */
+        .diagnosis-image {
+            max-width: 150px;
+            border-radius: 10px;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(76, 201, 240, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Add at the top of the container div in chat.html -->
+    <div id="image-upload-container" style="display: none; margin-bottom: 30px; background: rgba(25, 26, 36, 0.8); padding: 20px; border-radius: 16px;">
+        <h3 style="margin-bottom: 15px; color: white;">Upload New Image</h3>
+        <form action="/chat" method="POST" enctype="multipart/form-data">
+            <div class="file-input-wrapper" style="width: 100%; margin-bottom: 15px;">
+                <input type="file" name="image" accept="image/jpeg,image/png" required>
+                <label class="file-input-label" style="display: flex; align-items: center; justify-content: center; padding: 16px 20px; background: rgba(67, 97, 238, 0.1); color: var(--text-primary); border: 2px dashed rgba(67, 97, 238, 0.6); border-radius: 12px; font-size: 1rem; font-weight: 500; width: 100%;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="#4361ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17 8L12 3L7 8" stroke="#4361ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 3V15" stroke="#4361ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Select image for analysis
+                </label>
+            </div>
+            <button type="submit" style="width: 100%;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.25 4.5H3.75C3.33579 4.5 3 4.83579 3 5.25V18.75C3 19.1642 3.33579 19.5 3.75 19.5H20.25C20.6642 19.5 21 19.1642 21 18.75V5.25C21 4.83579 20.6642 4.5 20.25 4.5Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 12C10.1046 12 11 11.1046 11 10C11 8.89543 10.1046 8 9 8C7.89543 8 7 8.89543 7 10C7 11.1046 7.89543 12 9 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M21 15L16 11L4 19.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Analyze Image
+            </button>
+        </form>
+        <button id="close-upload" style="width: 100%; margin-top: 10px; background: rgba(25, 26, 36, 0.8); border: 1px solid rgba(67, 97, 238, 0.3);">Cancel</button>
+    </div>
+    <div class="page-container">
+        <div class="container">
+            <div class="accent-line"></div>
+            <div class="floating-element float-1"></div>
+            <div class="floating-element float-2"></div>
+            
+            <div class="doctor-info">
+                <div class="doctor-avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+                    </svg>
+                </div>
+                <div class="doctor-details">
+                    <h1>Dr. Tarannum</h1>
+                    <p>Dermatological Specialist</p>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Online Now</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-box" id="chatBox">
+                {% for sender, message, time in chat_history %}
+                <div class="message {% if sender == 'You' %}message-user{% else %}message-doctor{% endif %}">
+                    <p>{{ message }}</p>
+                    <div class="message-time">{{ time }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <form method="POST" action="{{ url_for('chat') }}">
+                <div class="input-area">
+                    <input type="text" name="user_input" placeholder="Type your message..." required autofocus>
+                    <button type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Replace the existing feature buttons -->
+        <div class="features">
+            <a href="{{ url_for('index') }}" class="home-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+                </svg>
+                Back to Home
+            </a>
+            
+            {% if image_path %}
+            <div class="feature-button" id="view-image-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path>
+                </svg>
+                View Uploaded Image
+            </div>
+            {% endif %}
+            
+            <div class="feature-button" id="upload-image-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path>
+                </svg>
+                Upload New Image
+            </div>
+            
+            <div class="feature-button" id="voice-call-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"></path>
+                </svg>
+                Voice Call
+            </div>
+        </div>
+        </div>
+    
+    <!-- <script>
+        // Auto-scroll to bottom of chat
+        document.addEventListener('DOMContentLoaded', function() {
+            var chatBox = document.getElementById('chatBox');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    </script> -->
+    <script>
+        // Auto-scroll to bottom of chat
+        document.addEventListener('DOMContentLoaded', function() {
+            var chatBox = document.getElementById('chatBox');
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            // Upload New Image functionality
+            const uploadBtn = document.getElementById('upload-image-btn');
+            const uploadContainer = document.getElementById('image-upload-container');
+            const closeUploadBtn = document.getElementById('close-upload');
+            
+            uploadBtn.addEventListener('click', function() {
+                uploadContainer.style.display = 'block';
+            });
+            
+            closeUploadBtn.addEventListener('click', function() {
+                uploadContainer.style.display = 'none';
+            });
+            
+            // Voice Call functionality
+            const callBtn = document.getElementById('voice-call-btn');
+            const callModal = document.getElementById('call-modal');
+            const endCallBtn = document.getElementById('end-call');
+            
+            callBtn.addEventListener('click', function() {
+                callModal.style.display = 'flex';
+                // Simulate auto-ending call after 5 seconds
+                setTimeout(function() {
+                    const chatBox = document.getElementById('chatBox');
+                    
+                    // Add system message that call ended
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message message-doctor';
+                    
+                    const time = new Date();
+                    const formattedTime = time.toLocaleString('en-US', {
+                        hour: 'numeric',
+                        minute: 'numeric',
+                        hour12: true
+                    }).replace(/^0+/, '');
+                    
+                    messageDiv.innerHTML = `
+                        <p>I noticed we had a brief call connection. If you have any questions about your skin condition, feel free to type them here, and I'll be happy to assist you further.</p>
+                        <div class="message-time">${formattedTime}</div>
+                    `;
+                    
+                    chatBox.appendChild(messageDiv);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    callModal.style.display = 'none';
+                }, 5000);
+            });
+            
+            endCallBtn.addEventListener('click', function() {
+                callModal.style.display = 'none';
+            });
+            
+            // View Image functionality (if exists)
+            const viewImageBtn = document.getElementById('view-image-btn');
+            if (viewImageBtn) {
+                viewImageBtn.addEventListener('click', function() {
+                    // Create a modal to show the image
+                    const modal = document.createElement('div');
+                    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; justify-content: center; align-items: center;';
+                    
+                    const imgSrc = '{{ image_path }}';
+                    modal.innerHTML = `
+                        <div style="position: relative; max-width: 90%; max-height: 90%;">
+                            <img src="${imgSrc}" style="max-width: 100%; max-height: 80vh; border-radius: 10px; border: 2px solid var(--accent);">
+                            <button style="position: absolute; top: -15px; right: -15px; background: #e63946; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">×</button>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                    
+                    modal.querySelector('button').addEventListener('click', function() {
+                        document.body.removeChild(modal);
+                    });
+                });
+            }
+        });
+    </script>
+    <!-- Add this at the end of the body in chat.html but before the closing body tag -->
+    <div id="call-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 100; justify-content: center; align-items: center;">
+        <div style="background: var(--card-bg); padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center;">
+            <div style="margin-bottom: 20px;">
+                <div class="doctor-avatar" style="margin: 0 auto 20px; width: 100px; height: 100px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+                    </svg>
+                </div>
+                <h3 style="margin-bottom: 10px; color: white;">Calling Dr. Tarannum...</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 30px;">Please wait while we connect your call</p>
+                <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+            <button id="end-call" style="background: #e63946; width: 50px; height: 50px; border-radius: 50%;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</body>
+</html>
